@@ -1,6 +1,20 @@
 class BaseTable(tuple):
+
+    def __init__(self, **kwargs):
+        super(BaseTable, self).__init__()
+        self._buckets = super(BaseTable, self).__len__()
+
     def __new__(cls, *args, **kwargs):
-        return tuple(Bucket(slots=kwargs.get('slots')) for _ in range(kwargs.get('buckets')))
+        return super(BaseTable, cls).__new__(
+            cls,
+            tuple(Bucket(slots=kwargs.get('slots')) for _ in range(kwargs.get('buckets'))))
+
+    def __len__(self):
+        return sum(map(len, self))
+
+    @property
+    def buckets(self):
+        return self._buckets
 
 
 class NewTable(BaseTable):
@@ -14,8 +28,22 @@ class TriedTable(BaseTable):
 
 
 class Bucket(tuple):
+
+    def __init__(self, **kwargs):
+        super(Bucket, self).__init__()
+        self._slots = super(Bucket, self).__len__()
+
     def __new__(cls, *args, **kwargs):
-        return tuple(None for _ in range(kwargs.get('slots', 64)))
+        return super(Bucket, cls).__new__(
+            cls,
+            tuple(None for _ in range(kwargs.get('slots', 64))))
+
+    def __len__(self):
+        return sum(map(lambda e: 1 if e is not None else 0, self))
+
+    @property
+    def slots(self):
+        return self._slots
 
 
 class TableEntry(object):
@@ -36,3 +64,6 @@ class TableEntry(object):
 
     def __le__(self, other):
         return self.timestamp <= other.timestamp
+
+    def __eq__(self, other):
+        return self.ip == other.ip and self.timestamp == other.timestamp
