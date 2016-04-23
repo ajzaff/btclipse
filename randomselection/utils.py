@@ -15,12 +15,11 @@ def triedprob(rho, omega):
     return rho_freq / (1 + omega + rho_freq)
 
 
-def acceptprob(e, rejected, now):
+def acceptprob(i, tau):
     """Probability of accepting entry ``e''
 
     :param e: (tables.PeerEntry) the candidate entry
-    :param rejected: (int) number of rejected entries
-    :param now: (timestamp) the current timestamp
+    :param i: (int) number of rejected entries
+    :param tau: (duration) the elapsed time
     """
-    tau = abs(now - e.timestamp)
-    return min(1, 1.2 ** rejected / (1 + tau))
+    return min(1, 1.2 ** i / (1 + tau))
