@@ -1,9 +1,9 @@
 class SimpleAddress(object):
 
     def __init__(self, group, ip):
-        self._group = group
-        self._ip = ip
-        self._str = '%d:%d' % (self.group, self.ip)
+        self._group = str(group)
+        self._ip = str(ip)
+        self._str = '%s:%s' % (self.group, self.ip)
 
     @property
     def group(self):
