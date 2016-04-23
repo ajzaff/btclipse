@@ -18,3 +18,7 @@ class Node(tuple):
     @property
     def triedtable(self):
         return self._triedtable
+
+    @property
+    def rho(self):
+        return len(self.triedtable) / len(self.newtable)
