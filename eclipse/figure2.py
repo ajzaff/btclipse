@@ -24,7 +24,7 @@ plt.xlabel('Fraction of adverserial addresses in tried')
 plt.ylabel('Pr[Eclipsing node]')
 for i, line in enumerate(lines):
     plt.plot(f_values, line, color=colors[i], linewidth=2., label='time invested: %d (hrs)' % tau_l_values[i])
-plt.plot(f_values, random_select_line, color='black', linewidth=2., linestyle='--')
+plt.plot(f_values, random_select_line, color='black', linewidth=2., linestyle='--', label='random select: 42 (hrs)')
 plt.grid()
 plt.legend(loc='upper left')
 plt.savefig('../figures/figure-2.png')
