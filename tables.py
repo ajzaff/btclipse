@@ -15,6 +15,11 @@ class BaseTable(object):
     def __delitem__(self, key):
         self._elems[key].clear()
 
+    def __eq__(self, other):
+        return self.slots == other.slots and \
+            self.buckets == other.buckets and \
+            self.elems == other.elems
+
     @property
     def elems(self):
         return tuple(self._elems)
@@ -63,8 +68,12 @@ class Bucket(object):
 
     def __delitem__(self, key):
         if self._elems[key]:
-            self._elems[key] = None
             self._len -= 1
+        self._elems[key] = None
+
+    def __eq__(self, other):
+        return self.slots == other.slots and \
+            self.elems == other.elems
 
     def clear(self):
         for i in range(self.slots):
@@ -80,7 +89,7 @@ class Bucket(object):
         return self._slots
 
 
-class TableEntry(object):
+class PeerEntry(object):
     def __init__(self, ip, timestamp=None):
         self._ip = ip
         self._timestamp = timestamp
@@ -100,4 +109,5 @@ class TableEntry(object):
         return self.timestamp <= other.timestamp
 
     def __eq__(self, other):
-        return self.ip == other.ip and self.timestamp == other.timestamp
+        return self.ip == other.ip and \
+               self.timestamp == other.timestamp
