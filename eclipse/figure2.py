@@ -15,12 +15,12 @@ f_prime = 8 / 64 ** 2
 
 for i, tau_l in enumerate(tau_l_values):
     for j, f in enumerate(f_values):
-        lines[i][j] = eclipse.utils.q(f, f_prime, .45, tau_l, n=10)
+        lines[i][j] = eclipse.utils.q(f, f_prime, .45, tau_l, n=10) ** 8
 
 plt.title('Probability of Eclipsing Node')
 plt.xlabel('Fraction of adverserial addresses in tried')
 plt.ylabel('Pr[Eclipsing node]')
 for i, line in enumerate(lines):
     plt.plot(f_values, line, color=colors[i], linewidth=2., label='time invested: %d (hrs)' % tau_l_values[i])
-plt.legend(loc='lower right')
+plt.legend(loc='upper left')
 plt.savefig('../figures/figure-2.png')
