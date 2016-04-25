@@ -1,8 +1,8 @@
 from random import randint
 
 def main():
-	# number of buckets in Tried table
-	numBuckets = 64
+	# number of buckets in Tried table (4x more in this sim)
+	numBuckets = 256
 	# number of IP addresses that fit into a bucket
 	numIP = 64
 
@@ -22,10 +22,10 @@ def main():
 	# Matrix of all IP adresses in tried table initialized to index in table
 	triedTable = [[-1 for x in range(numIP)] for y in range(numBuckets)]
 
-	# insert attacker IP, hash to a bucket first, then hash to an index in the bucket
+	# insert attacker IP, hash to a bucket first, then randomly evict a previous IP in the bucket
 	for i in range(numAttacks):
 		tempIP = randint(0,totalIP)
-		triedTable[tempIP%numBuckets][tempIP%numIP] = tempIP
+		triedTable[tempIP%numBuckets][randint(0,numIP)-1] = tempIP
 
 	# count number of inserted attacker IPs
 	for i in range(numBuckets):
