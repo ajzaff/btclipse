@@ -23,16 +23,13 @@ def triedprob(rho, omega):
 
 random.seed(420) # seed the random number generator to something... **sigh**.
 
-N = 100	# num of sims
+N = 100	 # num of sims
 P = (.2, .4, .6, .8)  # churn rate
-A = [x for x in range(0,30001)]	# attack IP
-H = [x for x in range(0,2501)]	# honest IP
+A = [round(1.05 ** x) for x in range(25)]	 # attack IP  [0...30000] log_{1.5} scale
+H = [round(1.05 ** x) for x in range(19)]	 # honest IP  [0...2500]  log_{1.5} scale
 
 graph = {p: [None for a in A] for p in P}
-winCount = collections.defaultdict(
-    lambda: collections.defaultdict(
-        lambda: collections.defaultdict(
-            int)))
+winCount = {h: {p: [0 for a in A] for p in P} for h in H}
 
 honest = 0
 attacker = 0
@@ -44,37 +41,31 @@ for n in range(N):
         outgoing = []
 
         # Matrix of all IP adresses in tried table initialized to index in table
-        triedTable = [[None for x in range(64)] for y in range(64)]
-        triedCount = 0
+        triedTable = dict()
 
         # insert honest in random posions of tried table
         for _ in range(h):
             # 0 represents honest IP
             bucket = randrange(0,64)
             slot = randrange(0,64)
-            if triedTable[bucket][slot] is None:
-                triedCount += 1
-            triedTable[bucket][slot] = honest
+            triedTable[bucket, slot] = honest
 
         # insert attacker IPs into tried Table
         for _ in range(a):
             # 1 represents attack IP
             bucket = randrange(0,64)
             slot = randrange(0,64)
-            if triedTable[bucket][slot] is None:
-                triedCount += 1
-            triedTable[bucket][slot] = attacker
+            triedTable[bucket, slot] = attacker
 
         # fill outgoing connections table
         while len(outgoing) < 8:
             omega = len(outgoing)
-            rho = triedCount / 256.
+            rho = len(triedTable) / 256.
             # if tried is selected
             if triedprob(rho, omega) <= random.random():
                 # append random IP from tried table
-                bucket = randrange(0,64)
-                slot = randrange(0,64)
-                tempIP = triedTable[bucket][slot]
+                bucket, slot = random.choice(list(triedTable.keys()))
+                tempIP = triedTable[bucket, slot]
                 if tempIP == honest:
                     if random.random() <= p:
                         # outgoing.append(honest)
@@ -90,6 +81,7 @@ for n in range(N):
             # the attacker wins
             winCount[h][p][a] += 1
 
+print(winCount)
 
 # fill the graph based on data collected in ``winCount''
 for h, p, a in itertools.product(H, P, A):
