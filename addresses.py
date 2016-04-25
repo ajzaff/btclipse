@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class SimpleAddress(object):
 
     def __init__(self, group, ip):
@@ -19,3 +22,10 @@ class SimpleAddress(object):
     def __eq__(self, other):
         return self.ip == other.ip and \
                self.group == other.group
+
+    @staticmethod
+    def randomaddress(rand=np.random, groups=None):
+        group = rand.choice(groups) if groups else \
+            rand.randint(1, 65536)
+        ip = rand.randint(0, 65536)
+        return SimpleAddress(group, ip)
