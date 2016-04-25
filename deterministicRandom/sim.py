@@ -23,7 +23,7 @@ def main(numBuckets=64, numIP=64, totalIP=100000, att=0.5, numAttacks=20):
         tempIP = randint(0,totalIP)
         triedTable[tempIP%numBuckets][tempIP%numIP] = tempIP
 
-    # count number of inserted attacker IPs
+    # count number of inserted dattacker IPs
     for i in range(numBuckets):
         for j in range (numIP):
             if (triedTable[i][j] > boundary):
@@ -33,4 +33,3 @@ def main(numBuckets=64, numIP=64, totalIP=100000, att=0.5, numAttacks=20):
 
 if __name__ == "__main__":
     wins, _ = main()
-    print wins
