@@ -21,14 +21,14 @@ def triedprob(rho, omega):
     return rho_freq / (1 + omega + rho_freq)
 
 
-random.seed(420) # seed the random number generator to something... **sigh**.
+random.seed(420)  # seed the random number generator to something... **sigh**.
 
 N = 1	 # num of sims
 colors = ('red', 'orange', 'yellow', 'green')
 P = (.8, .6, .4, .2)  # churn rate
 A = [round(1.5 ** x) for x in range(26)]	 # attack IP  [0...30000] log_{1.05} scale
 H = [round(1.5 ** x) for x in range(20)]	 # honest IP  [0...2500]  log_{1.05} scale
-graph = {p: list() for p in P}  # scatter plot
+graph = {p: collections.defaultdict(int) for p in P}  # scatter plot
 
 honest = 0
 attacker = 0
@@ -59,9 +59,9 @@ for n in range(N):
         # fill outgoing connections table
         while len(outgoing) < 8:
             omega = len(outgoing)
-            rho = len(triedTable) / 256.
+            rho = len(triedTable) / 16384.
             # if tried is selected
-            if triedprob(rho, omega) <= random.random():
+            if random.random() <= triedprob(rho, omega):
                 # append random IP from tried table
                 bucket, slot = random.choice(list(triedTable.keys()))
                 tempIP = triedTable[bucket, slot]
@@ -78,11 +78,12 @@ for n in range(N):
 
         if sum(outgoing) == 8*attacker:
             # the attacker wins
-            graph[p].append((a, h))
+            graph[p][a, h] += 1
 
 
 # create the plot
 for i, p in enumerate(P):
-    x, y = zip(*graph[.2])  # unzip
-    plt.scatter(x, y, color=colors[1])
+    points, size = zip(*graph[p].items())  # unzip point and size
+    x, y = zip(*points)  # unzip (x, y) points
+    plt.scatter(x, y, color=colors[i], sizes=list(map(lambda x: 4 ** x, size)))
 plt.show()
