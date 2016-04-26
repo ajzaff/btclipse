@@ -23,13 +23,12 @@ def triedprob(rho, omega):
 
 random.seed(420) # seed the random number generator to something... **sigh**.
 
-N = 100	 # num of sims
-P = (.2, .4, .6, .8)  # churn rate
-A = [round(1.05 ** x) for x in range(25)]	 # attack IP  [0...30000] log_{1.5} scale
-H = [round(1.05 ** x) for x in range(19)]	 # honest IP  [0...2500]  log_{1.5} scale
-
-graph = {p: [None for a in A] for p in P}
-winCount = {h: {p: [0 for a in A] for p in P} for h in H}
+N = 1	 # num of sims
+colors = ('red', 'orange', 'yellow', 'green')
+P = (.8, .6, .4, .2)  # churn rate
+A = [round(1.5 ** x) for x in range(26)]	 # attack IP  [0...30000] log_{1.05} scale
+H = [round(1.5 ** x) for x in range(20)]	 # honest IP  [0...2500]  log_{1.05} scale
+graph = {p: list() for p in P}  # scatter plot
 
 honest = 0
 attacker = 0
@@ -79,23 +78,11 @@ for n in range(N):
 
         if sum(outgoing) == 8*attacker:
             # the attacker wins
-            winCount[h][p][a] += 1
+            graph[p].append((a, h))
 
-print(winCount)
-
-# fill the graph based on data collected in ``winCount''
-for h, p, a in itertools.product(H, P, A):
-    wins = winCount[h][p][a]
-    if wins >= N / 2:
-        if graph[p][a] is None:
-            graph[p][a] = 0
-        graph[p][a] += h
-
-# normalize the graph
-for p, a in itertools.product(P, A):
-    graph[p][a] /= N
 
 # create the plot
-for p in P:
-    plt.plot(graph[p])
+for i, p in enumerate(P):
+    x, y = zip(*graph[.2])  # unzip
+    plt.scatter(x, y, color=colors[1])
 plt.show()
