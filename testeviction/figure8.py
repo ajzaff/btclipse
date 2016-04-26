@@ -33,7 +33,7 @@ def sampleips(a, h, tablesize=4096):
     p_honest = float(h) / (a + h + tablesize)
     p_nonempty = p_attacker + p_honest
     n = max(a, h)
-    for i in range(n):
+    for _ in range(n):
         r = random.random()
         if r <= p_attacker:
             bucket = randrange(64)
@@ -62,7 +62,7 @@ for n in range(N):
     print("trial %d/%d" % (n+1, N))
     for h, p, a in itertools.product(H, P, A):
         # table of outgoing connections from the victim
-        outgoing = []
+        outgoing = 0
 
         # Matrix of all IP adresses in tried table initialized to index in table
         # triedTable = dict()
@@ -83,8 +83,8 @@ for n in range(N):
         #     triedTable[bucket, slot] = attacker
 
         # fill outgoing connections table
-        while len(outgoing) < 8:
-            omega = len(outgoing)
+        while outgoing < 8:
+            omega = outgoing
             rho = len(triedTable) / 16384.
             # if tried is selected
             if random.random() <= triedprob(rho, omega):
@@ -93,23 +93,24 @@ for n in range(N):
                 tempIP = triedTable[bucket, slot]
                 if tempIP == honest:
                     if random.random() <= p:
-                        # outgoing.append(honest)
                         break  # attacker did not eclipse the node
                 else:
-                    outgoing.append(attacker)
+                    outgoing += 1
 
             else:
                 # append from new table (attacker IP)
-                outgoing.append(attacker)
+                outgoing += 1
 
-        if sum(outgoing) == 8*attacker:
+        if outgoing == 8:
             # the attacker wins
             graph[p][a, h] += 1
 
 
 # create the plot
 for i, p in enumerate(P):
+    print("plotting", p)
     points, _ = zip(*graph[p].items())  # unzip point and size
+    points = sorted(points, key=lambda e: e[0])
     x, y = zip(*points)  # unzip (x, y) points
     plt.plot(x, y, color=colors[i])
 plt.show()
