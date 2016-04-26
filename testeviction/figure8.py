@@ -61,7 +61,7 @@ H = [round(hi * x) for x in range(20)]	 # honest IP  [0...2500]
 graph = {p: collections.defaultdict(int) for p in P}  # scatter plot
 
 honest = 0
-attacker = 0
+attacker = 1
 
 for n in range(N):
     print("trial %d/%d" % (n+1, N))
