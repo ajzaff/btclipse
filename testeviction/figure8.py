@@ -78,7 +78,7 @@ for n in range(N):
                 outgoing.append(attacker)
 
         if sum(outgoing) == 8*attacker:
-            # the attacker wins
+            # the attacker wins (and eclipsed the node)
             winCount[h][p][a] += 1
 
 print(winCount)
