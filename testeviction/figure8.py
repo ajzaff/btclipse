@@ -21,6 +21,31 @@ def triedprob(rho, omega):
     return rho_freq / (1 + omega + rho_freq)
 
 
+def sampleips(a, h, tablesize=4096):
+    """Samples the IP to place in a given table cell.
+
+    :param a: (int) attacker IPs
+    :param h: (int) honest IPs
+    :param tablesize: (int) the size of the tried table
+    :return: yields a stream of (bucket, slot) => IP
+    """
+    p_attacker = float(a) / (a + h + tablesize)
+    p_honest = float(h) / (a + h + tablesize)
+    p_nonempty = p_attacker + p_honest
+    n = max(a, h)
+    for i in range(n):
+        r = random.random()
+        if r <= p_attacker:
+            bucket = randrange(64)
+            slot = randrange(64)
+            yield (bucket, slot), attacker
+        elif r <= p_nonempty:
+            bucket = randrange(64)
+            slot = randrange(64)
+            yield (bucket,slot), honest
+
+
+
 random.seed(420)  # seed the random number generator to something... **sigh**.
 
 N = 1	 # num of sims
@@ -40,21 +65,22 @@ for n in range(N):
         outgoing = []
 
         # Matrix of all IP adresses in tried table initialized to index in table
-        triedTable = dict()
+        # triedTable = dict()
+        triedTable = {(bucket, slot): ip for (bucket, slot), ip in sampleips(a, h)}
 
         # insert honest in random posions of tried table
-        for _ in range(h):
-            # 0 represents honest IP
-            bucket = randrange(0,64)
-            slot = randrange(0,64)
-            triedTable[bucket, slot] = honest
-
-        # insert attacker IPs into tried Table
-        for _ in range(a):
-            # 1 represents attack IP
-            bucket = randrange(0,64)
-            slot = randrange(0,64)
-            triedTable[bucket, slot] = attacker
+        # for _ in range(h):
+        #     # 0 represents honest IP
+        #     bucket = randrange(0,64)
+        #     slot = randrange(0,64)
+        #     triedTable[bucket, slot] = honest
+        #
+        # # insert attacker IPs into tried Table
+        # for _ in range(a):
+        #     # 1 represents attack IP
+        #     bucket = randrange(0,64)
+        #     slot = randrange(0,64)
+        #     triedTable[bucket, slot] = attacker
 
         # fill outgoing connections table
         while len(outgoing) < 8:
@@ -83,7 +109,7 @@ for n in range(N):
 
 # create the plot
 for i, p in enumerate(P):
-    points, size = zip(*graph[p].items())  # unzip point and size
+    points, _ = zip(*graph[p].items())  # unzip point and size
     x, y = zip(*points)  # unzip (x, y) points
-    plt.scatter(x, y, color=colors[i], sizes=list(map(lambda x: 4 ** x, size)))
+    plt.plot(x, y, color=colors[i])
 plt.show()
