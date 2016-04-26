@@ -4,7 +4,6 @@ eclipse probability for test-before-evict.
 """
 
 import collections
-import itertools
 import random
 from random import randrange
 import math
@@ -45,14 +44,20 @@ def sampleips(a, h, tablesize=4096):
             yield (bucket,slot), honest
 
 
+def jointsample(n, *params):
+    for _ in range(n):
+        yield tuple(map(lambda e: random.choice(e), params))
+
 
 random.seed(420)  # seed the random number generator to something... **sigh**.
 
-N = 1	 # num of sims
+N = 10000	 # num of sims
 colors = ('red', 'orange', 'yellow', 'green')
 P = (.8, .6, .4, .2)  # churn rate
-A = [round(1.5 ** x) for x in range(26)]	 # attack IP  [0...30000] log_{1.05} scale
-H = [round(1.5 ** x) for x in range(20)]	 # honest IP  [0...2500]  log_{1.05} scale
+ai = 30000 / 1000
+hi = 2500 / 250
+A = [round(ai * x) for x in range(26)]	 # attack IP  [0...30000]
+H = [round(hi * x) for x in range(20)]	 # honest IP  [0...2500]
 graph = {p: collections.defaultdict(int) for p in P}  # scatter plot
 
 honest = 0
@@ -60,7 +65,7 @@ attacker = 0
 
 for n in range(N):
     print("trial %d/%d" % (n+1, N))
-    for h, p, a in itertools.product(H, P, A):
+    for h, p, a in jointsample(H, P, A):
         # table of outgoing connections from the victim
         outgoing = 0
 
@@ -107,10 +112,14 @@ for n in range(N):
 
 
 # create the plot
+series = []
+labels = []
 for i, p in enumerate(P):
     print("plotting", p)
     points, _ = zip(*graph[p].items())  # unzip point and size
     points = sorted(points, key=lambda e: e[0])
     x, y = zip(*points)  # unzip (x, y) points
-    plt.plot(x, y, color=colors[i])
+    series.append(plt.scatter(x, y, color=colors[i], marker='o'))
+    labels.append('p=%d%%' % int(100 * p))
+plt.legend(series, labels, loc='best')
 plt.show()
