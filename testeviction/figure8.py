@@ -77,23 +77,8 @@ for n in range(N):
                 outgoing.append(attacker)
 
         if sum(outgoing) == 8*attacker:
-<<<<<<< HEAD
             # the attacker wins
             graph[p].append((a, h))
-=======
-            # the attacker wins (and eclipsed the node)
-            winCount[h][p][a] += 1
-
-print(winCount)
-
-# fill the graph based on data collected in ``winCount''
-for h, p, a in itertools.product(H, P, A):
-    wins = winCount[h][p][a]
-    if wins >= N / 2:
-        if graph[p][a] is None:
-            graph[p][a] = 0
-        graph[p][a] += h
->>>>>>> 77bfc7d3130e7b6b39680ea4a8cc6e7a954ec6a4
 
 
 # create the plot
