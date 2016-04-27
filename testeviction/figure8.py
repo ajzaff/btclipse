@@ -9,6 +9,7 @@ from random import randrange
 import math
 import matplotlib.pyplot as plt
 
+random.seed(420)  # seed the random number generator to something... **sigh**.
 
 def triedprob(rho, omega):
     """Probability an IP is seeded from the tried table.
@@ -55,14 +56,15 @@ def testsampleips(a, h, p, n=None, tablesize=4096):
     :param tablesize: (int) the size of the tried table
     :return: yields a stream of (bucket, slot) => IP
     """
+    a = round(a * (1 - p))
     if a + h == 0:
         return
     if n is None:
         n = max(a, h)
     for _ in range(n):
-        p_attacker = float(a + tablesize) / (a + h + tablesize)
+        p_attacker = float(a) / (a + h)
         r = random.random()
-        if r <= p_attacker and random.random() <= p:
+        if r <= p_attacker:
             bucket = randrange(64)
             slot = randrange(64)
             yield (bucket, slot), attacker
@@ -79,27 +81,28 @@ def jointsample(n, *params):
         yield tuple(map(lambda e: random.choice(e), params))
 
 
-def sizemap(sizes, base=1.04):
+def sizemap(sizes, base=3):
     return tuple(map(lambda s: min(100, max(4, base * s)), sizes))
 
 
-random.seed(420)  # seed the random number generator to something... **sigh**.
+N = 400000
+colors = ('blue', 'purple', 'pink', 'black')
+regcolors = ('blue', 'purple', 'pink', 'gray')
+P = (.2, .4, .6, .8)  # churn rate
 
 honest = 0
 attacker = 1
 
 # Plot figures
 fig = plt.figure()
-ax1 = fig.add_subplot(211)
-ax2 = fig.add_subplot(212)
+ax1 = fig.add_subplot(212)
+ax2 = fig.add_subplot(211)
 
-N = 100000
-colors = ('green', 'yellow', 'orange', 'red')
+# start sim 1
 a_step = 200
 h_step = 20
-P = (.2, .4, .6, .8)  # churn rate
-A = [x * a_step for x in range(round(30001 / a_step))]	 # attack IP  [0...30000]
-H = [x * h_step for x in range(round(2500 / h_step))]	 # honest IP  [0...4096]
+A = [x * a_step for x in range(round(35001 / a_step))]	 # attack IP  [0...30000]
+H = [x * h_step for x in range(round(5000 / h_step))]	 # honest IP  [0...4096]
 graph = {}
 
 for (h, p, a) in jointsample(N, H, P, A):
@@ -126,20 +129,23 @@ for i, p in enumerate(sorted(graph)):
     ax2.scatter(x, y,
                 color=colors[i],
                 sizes=sizemap(size),
-                # edgecolors=['black'] * len(x),
                 marker='o')
+
+    z = np.polyfit(x, y, 2)
+    f = np.poly1d(z)
+    ax2.plot(x, f(x),
+             color=regcolors[i],
+             linewidth=4.)
+
 ax2.set_ylabel('Honest Addresses')
-ax2.set_xlabel('Adversarial Addresses')
 ax2.set_xlim(0, 30000)
 ax2.set_ylim(0, 2500)
 
-N = 100000
-colors = ('green', 'yellow', 'orange', 'red')
+# start sim 2
 a_step = 50
 h_step = 100
-P = (.2, .4, .6, .8)  # churn rate
-A = [x * a_step for x in range(round(8001 / a_step))]	 # attack IP  [0...8000]
-H = [y * h_step for y in range(round(4001 / h_step))]	 # honest IP  [0...4000]
+A = [x * a_step for x in range(round(12001 / a_step))]	 # attack IP  [0...8000]
+H = [y * h_step for y in range(round(8001 / h_step))]	 # honest IP  [0...4000]
 graph = {}
 
 for (h, p, a) in jointsample(N, H, P, A):
@@ -170,10 +176,15 @@ for i, p in enumerate(sorted(graph)):
         ax1.scatter(x, y,
                     color=colors[i],
                     sizes=sizemap(size),
-                    # edgecolors=['black'] * len(x),
                     marker='o'))
     labels.append('p=%d%%' % int(100 * p))
-ax1.legend(series, labels, loc='upper left')
+    z = np.polyfit(x, y, 2)
+    f = np.poly1d(z)
+    ax1.plot(x, f(x),
+             color=regcolors[i],
+             linewidth=4.)
+ax1.legend(series, labels, loc='lower right', prop={'size': 6})
+ax1.set_xlabel('Adversarial Addresses')
 ax1.set_ylabel('Honest Addresses')
 ax1.set_xlim(0, 8000)
 ax1.set_ylim(0, 4000)
